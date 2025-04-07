@@ -19,18 +19,18 @@ class FIR_FILTER {
 		FIR_FILTER(uint8_t num_taps, uint8_t block_size);
 
 		void SetCoefficient(float* Coefficient);
-		void SetData(float in_data[][3]);
+		void SetData(float (*in_data)[8]);
 		void Calc();
-		void GetData(float out_data[3]);
+		void GetData(float buffer[3]);
 
 	private:
 
 		uint8_t num_taps;
 		uint8_t block_size;
-		float (*data)[3];
-		float (*tmp_data)[3];
-		float (*status)[3];
-		float* Coefficient;
+		float in_data[32][3];
+		float out_data[32][3];
+		float status[32][3];
+		float Coefficient[8];
 };
 
 #endif /* INC_FIR_FILTER_HPP_ */

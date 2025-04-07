@@ -23,19 +23,11 @@ FIR_FILTER::FIR_FILTER(uint8_t num_taps, uint8_t block_size) {
 	//データの確認
 	if(block_size % 4 == 0){
 
-	//配列の確保
-	data = new float[block_size][3];
-	tmp_data = new float[block_size][3];
-	status = new float[block_size + num_taps - 1][3];
-	Coefficient = new float[num_taps];
-
 	//引数の保存
 	this->num_taps = num_taps;
 	this->block_size = block_size;
 
 	}
-
-	printf("%3.3lf \n",Coefficient[0]);
 }
 
 /*　@brief FIRフィルタ係数（タップ係数）の設定
@@ -64,26 +56,25 @@ void FIR_FILTER::SetCoefficient(float* Coefficient){
  *
  * @return None
  */
-void FIR_FILTER::SetData(float in_data[][3]){
+void FIR_FILTER::SetData(float (*in_data)[8]){
 
-	//保存されているデータを後ろにずらす
-	for(uint8_t i=0; i<block_size-(block_size/4); i++){
+	//データをずらす
+	for(uint8_t i=0; i<3; i++){
 
-		for(uint8_t j=0; j<3; j++){
+		for(uint8_t j=31; j>8; j--){
 
-			data[i][j] = data[i+1][j];
+			this->in_data[i][j] = this->in_data[i][j-1];
 		}
 	}
 
-	//空いた配列にデータを入力
-	for(uint8_t i=0; i<(block_size/4); i++){
+	//データを取り込む
+	for(uint8_t i=0; i<3; i++){
 
-		for(uint8_t j=0; j<3; j++){
+		for(uint8_t j=0; j<8; j++){
 
-			data[i][j] = in_data[i][j];
+			this->in_data[i][j] = in_data[i][j];
 		}
 	}
-
 }
 
 /*　@brief FIRフィルタの計算
@@ -95,7 +86,7 @@ void FIR_FILTER::Calc(){
 	for (uint8_t i=0;i<3;i++){
 
 		arm_fir_instance_f32 fir_instance = {num_taps, status[i], Coefficient};
-		arm_fir_f32 (&fir_instance, data[i], tmp_data[i], block_size);
+		arm_fir_f32 (&fir_instance, in_data[i], out_data[i], block_size);
 	}
 }
 
@@ -108,10 +99,10 @@ void FIR_FILTER::Calc(){
  *
  * @return None
  */
-void FIR_FILTER::GetData(float out_data[3]){
+void FIR_FILTER::GetData(float buffer[3]){
 
 	for(uint8_t i=0; i<3; i++){
 
-		out_data[i] = tmp_data[i][block_size - 1];
+		buffer[i] = out_data[i][block_size - 1];
 	}
 }
