@@ -16,7 +16,7 @@ class FIR_FILTER {
 
 	public:
 
-		FIR_FILTER(uint8_t num_taps, uint8_t block_size);
+		FIR_FILTER(uint8_t dimension, uint8_t num_taps, uint8_t block_size);
 
 		void SetCoefficient(float* Coefficient);
 		void SetData(float (*in_data)[8]);
@@ -27,6 +27,7 @@ class FIR_FILTER {
 
 		uint8_t num_taps;
 		uint8_t block_size;
+		uint8_t dimension;
 		float in_data[32][3];
 		float out_data[32][3];
 		float status[32][3];

@@ -18,7 +18,7 @@
  *
  * @return None
  */
-FIR_FILTER::FIR_FILTER(uint8_t num_taps, uint8_t block_size) {
+FIR_FILTER::FIR_FILTER(uint8_t dimension, uint8_t num_taps, uint8_t block_size) {
 
 	//データの確認
 	if(block_size % 4 == 0){
@@ -26,7 +26,7 @@ FIR_FILTER::FIR_FILTER(uint8_t num_taps, uint8_t block_size) {
 	//引数の保存
 	this->num_taps = num_taps;
 	this->block_size = block_size;
-
+	this->dimension = dimension;
 	}
 }
 
@@ -59,18 +59,18 @@ void FIR_FILTER::SetCoefficient(float* Coefficient){
 void FIR_FILTER::SetData(float (*in_data)[8]){
 
 	//データをずらす
-	for(uint8_t i=0; i<3; i++){
+	for(uint8_t i=0; i<dimension; i++){
 
-		for(uint8_t j=31; j>8; j--){
+		for(uint8_t j=block_size-1; j>block_size/4; j--){
 
 			this->in_data[i][j] = this->in_data[i][j-1];
 		}
 	}
 
 	//データを取り込む
-	for(uint8_t i=0; i<3; i++){
+	for(uint8_t i=0; i<dimension; i++){
 
-		for(uint8_t j=0; j<8; j++){
+		for(uint8_t j=0; j<block_size/4; j++){
 
 			this->in_data[i][j] = in_data[i][j];
 		}
@@ -83,7 +83,7 @@ void FIR_FILTER::SetData(float (*in_data)[8]){
  */
 void FIR_FILTER::Calc(){
 
-	for (uint8_t i=0;i<3;i++){
+	for (uint8_t i=0;i<dimension;i++){
 
 		arm_fir_instance_f32 fir_instance = {num_taps, status[i], Coefficient};
 		arm_fir_f32 (&fir_instance, in_data[i], out_data[i], block_size);
@@ -101,7 +101,7 @@ void FIR_FILTER::Calc(){
  */
 void FIR_FILTER::GetData(float buffer[3]){
 
-	for(uint8_t i=0; i<3; i++){
+	for(uint8_t i=0; i<dimension; i++){
 
 		buffer[i] = out_data[i][block_size - 1];
 	}
